@@ -1,20 +1,31 @@
 import 'package:xml/xml.dart';
 
-//import 'dart:convert';
-//import 'dart:io';
+// Here's the manual for MuseScore: https://musescore.org/en/handbook
 
 XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
-  var composer = metronomeInputMap['composer'];
-  var tempo = metronomeInputMap['tempo'];
-  var nBars = metronomeInputMap['nBars'];
+  var now = DateTime.now();
+  var museScoreFileName = metronomeInputMap['museScoreFileName'];
+  var title = metronomeInputMap['title'] ?? museScoreFileName;
+  var subTitle = metronomeInputMap['subTitle'] ?? museScoreFileName;
+  var composer = metronomeInputMap['composer'] ?? '';
+  var arranger = metronomeInputMap['arranger'] ?? '';
+  var copyrightDate = metronomeInputMap['copyrightDate'] ?? 'copyleft ${now.year}';
+  var creationDate = metronomeInputMap['creationDate'] ?? '${now.month}/${now.day}/${now.year}';
+  var workingTitle = metronomeInputMap['workingTitle'] ?? '';
+  var sigNumerator = metronomeInputMap['sigNumerator'] ?? '4';
+  var sigDenominator = metronomeInputMap['sigDenominator'] ?? '4';
+  var tempo = metronomeInputMap['tempo'] ?? '84';
+  var nBars = metronomeInputMap['nBars'] ?? '32';
 
   final museScoreXmlBuilder = XmlBuilder();
   museScoreXmlBuilder.processing('xml', 'version="1.0" encoding="UTF-8"');
-  museScoreXmlBuilder.element('museScore', nest: () {
+  museScoreXmlBuilder.element('museScore', nest: ()
+  {
     museScoreXmlBuilder.attribute('version', '3.01');
     museScoreXmlBuilder.element('programVersion', nest: '3.2.3');
     museScoreXmlBuilder.element('programRevision', nest: 'd2d863f');
-    museScoreXmlBuilder.element('Score', nest: () {
+    museScoreXmlBuilder.element('Score', nest: ()
+    {
       museScoreXmlBuilder.element('LayerTag', nest: () {
         museScoreXmlBuilder.attribute('id', 0);
         museScoreXmlBuilder.attribute('tag', 'default');
@@ -57,6 +68,14 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
         museScoreXmlBuilder.element('chordSymbolAFrameWidth', nest: 0);
         museScoreXmlBuilder.element('musicalSymbolFont', nest: 'Bravura');
         museScoreXmlBuilder.element('musicalTextFont', nest: 'Bravura Text');
+        museScoreXmlBuilder.element('showHeader', nest: 1); // new
+        museScoreXmlBuilder.element('headerFirstPage', nest: 1); // new
+        museScoreXmlBuilder.element('evenHeaderL', nest: '\$P/\$n');
+        museScoreXmlBuilder.element('evenHeaderC', nest: '\$d');
+        museScoreXmlBuilder.element('oddHeaderC', nest: '\n\n\n\n\n\n\$d');
+        museScoreXmlBuilder.element('oddHeaderR', nest: '\$P/\$n');
+        museScoreXmlBuilder.element('footerOddEven', nest: 0);
+        museScoreXmlBuilder.element('oddFooterC', nest: '\$c');
         museScoreXmlBuilder.element('voltaFontFace', nest: 'Georgia');
         museScoreXmlBuilder.element('voltaFramePadding', nest: 0);
         museScoreXmlBuilder.element('voltaFrameWidth', nest: 0);
@@ -173,7 +192,6 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
         museScoreXmlBuilder.element('textLineFontFace', nest: 'Georgia');
         museScoreXmlBuilder.element('glissandoFontFace', nest: 'Georgia');
         museScoreXmlBuilder.element('glissandoAlign', nest: 'center,baseline');
-
         museScoreXmlBuilder.element('glissandoFramePadding', nest: 0);
         museScoreXmlBuilder.element('glissandoFrameWidth', nest: 0);
         museScoreXmlBuilder.element('bendFontFace', nest: 'Georgia');
@@ -202,14 +220,14 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
         museScoreXmlBuilder.element('user1FrameWidth', nest: 0);
         museScoreXmlBuilder.element('Spatium', nest: 1.76389);
       });
-      museScoreXmlBuilder.element('showInvisible', nest: 1);
-      museScoreXmlBuilder.element('showUnprintable', nest: 1);
+      museScoreXmlBuilder.element('showInvisible', nest: 1); // ?
+      museScoreXmlBuilder.element('showUnprintable', nest: 1); // ?
       museScoreXmlBuilder.element('showFrames', nest: 1);
-      museScoreXmlBuilder.element('showMargins', nest: 0);
+      museScoreXmlBuilder.element('showMargins', nest: 1); // prob remove
 
       museScoreXmlBuilder.element('metaTag', nest: () {
         museScoreXmlBuilder.attribute('name', 'arranger');
-        museScoreXmlBuilder.text('Peter Della Croce');
+        museScoreXmlBuilder.text(arranger);
       });
       museScoreXmlBuilder.element('metaTag', nest: () {
         museScoreXmlBuilder.attribute('name', 'composer');
@@ -217,11 +235,11 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
       });
       museScoreXmlBuilder.element('metaTag', nest: () {
         museScoreXmlBuilder.attribute('name', 'copyright');
-        museScoreXmlBuilder.text('2020');
+        museScoreXmlBuilder.text(copyrightDate);
       });
       museScoreXmlBuilder.element('metaTag', nest: () {
         museScoreXmlBuilder.attribute('name', 'creationDate');
-        museScoreXmlBuilder.text('2020-06-05');
+        museScoreXmlBuilder.text(creationDate);
       });
 
       museScoreXmlBuilder.element('metaTag', nest: () {
@@ -259,7 +277,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
 
       museScoreXmlBuilder.element('metaTag', nest: () {
         museScoreXmlBuilder.attribute('name', 'workTitle');
-        museScoreXmlBuilder.text('Some Working Title');
+        museScoreXmlBuilder.text(workingTitle);
       });
 
       museScoreXmlBuilder.element('Part', nest: () {
@@ -274,13 +292,13 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
           museScoreXmlBuilder.element('defaultClef', nest: 'PERC');
         });
 
-        museScoreXmlBuilder.element('trackName', nest: 'MDL Snare Line A');
+        //museScoreXmlBuilder.element('trackName', nest: 'MDL Snare Line A'); // ?? here?
         museScoreXmlBuilder.element('Instrument', nest: () {
-          museScoreXmlBuilder.element('longName', nest: 'Snare Line ');
+          museScoreXmlBuilder.element('longName', nest: 'Snare Line '); // change
           museScoreXmlBuilder.element('shortName', nest: 'S. L.');
           museScoreXmlBuilder.element('trackName', nest: 'MDL Snare Line A');
           museScoreXmlBuilder.element('instrumentId', nest: 'mdl.drum.snare-drum');
-          museScoreXmlBuilder.element('useDrumset', nest: 1);
+          museScoreXmlBuilder.element('useDrumset', nest: 1); // ??
 
 //          <Drum pitch="21">
 //          <head>normal</head>
@@ -482,7 +500,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
               museScoreXmlBuilder.attribute('ctrl', '7');
               museScoreXmlBuilder.attribute('value', '106');
             });
-            museScoreXmlBuilder.element('synti', nest: 'Zerberus');
+            museScoreXmlBuilder.element('synti', nest: 'Zerberus'); // ??
           });
         });
       });
@@ -493,119 +511,150 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
           museScoreXmlBuilder.element('height', nest: '10');
           museScoreXmlBuilder.element('Text', nest: () {
             museScoreXmlBuilder.element('style', nest: 'Title');
-            museScoreXmlBuilder.element('text', nest: 'In Search of Minimal');
+            museScoreXmlBuilder.element('text', nest: title);
           });
           museScoreXmlBuilder.element('Text', nest: () {
             museScoreXmlBuilder.element('style', nest: 'Subtitle');
-            museScoreXmlBuilder.element('text', nest: 'Subtitle Here');
+            museScoreXmlBuilder.element('text', nest: subTitle);
           });
           museScoreXmlBuilder.element('Text', nest: () {
             museScoreXmlBuilder.element('style', nest: 'Composer');
-            museScoreXmlBuilder.element('text', nest: 'Rob Reed');
-          });
-        });
-        museScoreXmlBuilder.element('Measure', nest: () {
-          museScoreXmlBuilder.element('voice', nest: () {
-            museScoreXmlBuilder.element('TimeSig', nest: () {
-              museScoreXmlBuilder.element('sigN', nest: '4');
-              museScoreXmlBuilder.element('sigD', nest: '4');
-            });
-            museScoreXmlBuilder.element('Tempo', nest: () {
-              // tempo value T in next line is a multiplier M, where M=1 means T=60
-              // So, if you want a tempo of T, then divide it by 60 to get the value for 'tempo'
-              museScoreXmlBuilder.element('tempo', nest: '${tempo/60}');
-              museScoreXmlBuilder.element('followText', nest: '1');
-              museScoreXmlBuilder.element('text', nest: () {
-                museScoreXmlBuilder.element('sym', nest: 'metNoteQuarterUp');
-                museScoreXmlBuilder.text(' = ${tempo}');
-              });
-            });
-            museScoreXmlBuilder.element('Chord', nest: () {
-              museScoreXmlBuilder.element('durationType', nest: 'quarter');
-              museScoreXmlBuilder.element('StemDirection', nest: 'up');
-              museScoreXmlBuilder.element('Note', nest: () {
-                museScoreXmlBuilder.element('pitch', nest: '60');
-                museScoreXmlBuilder.element('tpc', nest: '14');
-              });
-            });
-            museScoreXmlBuilder.element('Chord', nest: () {
-              museScoreXmlBuilder.element('durationType', nest: 'quarter');
-              museScoreXmlBuilder.element('StemDirection', nest: 'up');
-              museScoreXmlBuilder.element('Note', nest: () {
-                museScoreXmlBuilder.element('pitch', nest: '60');
-                museScoreXmlBuilder.element('tpc', nest: '14');
-              });
-            });
-            museScoreXmlBuilder.element('Chord', nest: () {
-              museScoreXmlBuilder.element('durationType', nest: 'quarter');
-              museScoreXmlBuilder.element('StemDirection', nest: 'up');
-              museScoreXmlBuilder.element('Note', nest: () {
-                museScoreXmlBuilder.element('pitch', nest: '60');
-                museScoreXmlBuilder.element('tpc', nest: '14');
-              });
-            });
-            museScoreXmlBuilder.element('Chord', nest: () {
-              museScoreXmlBuilder.element('durationType', nest: 'quarter');
-              museScoreXmlBuilder.element('StemDirection', nest: 'up');
-              museScoreXmlBuilder.element('Note', nest: () {
-                museScoreXmlBuilder.element('pitch', nest: '60');
-                museScoreXmlBuilder.element('tpc', nest: '14');
-              });
-            });
+            museScoreXmlBuilder.element('text', nest: composer);
           });
         });
 
-        museScoreXmlBuilder.element('Measure', nest: () {
-          museScoreXmlBuilder.element('voice', nest: () {
-            museScoreXmlBuilder.element('RepeatMeasure', nest: () {
-              museScoreXmlBuilder.element('offset', nest: () {
-                museScoreXmlBuilder.attribute('x', 0);
-                museScoreXmlBuilder.attribute('y', -2);
+        print('Starting to write ${nBars} bars.');
+          print('Starting to write first bar');
+          museScoreXmlBuilder.element('Measure', nest: () {
+            museScoreXmlBuilder.element('voice', nest: () {
+              // we only want to do this when there's a time sig change
+              // Fix later
+              //if (barCtr == 0) {
+                museScoreXmlBuilder.element('TimeSig', nest: () {
+                  museScoreXmlBuilder.element('sigN', nest: sigNumerator);
+                  museScoreXmlBuilder.element('sigD', nest: sigDenominator);
+                });
+                print('Wrote timesig');
+              //}
+              // Why is this here, and not before the measure???
+              museScoreXmlBuilder.element('Tempo', nest: () {
+                // tempo value T in next line is a multiplier M, where M=1 means T=60
+                // So, if you want a tempo of T, then divide it by 60 to get the value for 'tempo'
+                museScoreXmlBuilder.element('tempo', nest: '${tempo / 60}');
+                museScoreXmlBuilder.element('followText', nest: '1');
+                museScoreXmlBuilder.element('text', nest: () {
+                  museScoreXmlBuilder.element('sym', nest: 'metNoteQuarterUp');
+                  museScoreXmlBuilder.text(' = ${tempo}'); // prob here???
+                });
               });
-              museScoreXmlBuilder.element('durationType', nest: 'measure');
-              museScoreXmlBuilder.element('duration', nest: '4/4');
+              print('Wrote tempo which is strange here');
+              // Here come the notes that make up the metronome
+              // This section should therefore be some kind of looping within looping to account for
+              // various metronome settings for a tune, with set of rolloff segments, or a set of tunes.
+              //
+              for (var noteCtr = 0; noteCtr < sigNumerator; noteCtr++) {
+                museScoreXmlBuilder.element('Chord', nest: () {
+                  museScoreXmlBuilder.element('durationType', nest: 'quarter');
+                  museScoreXmlBuilder.element('StemDirection', nest: 'up');
+                  museScoreXmlBuilder.element('Note', nest: () {
+                    museScoreXmlBuilder.element('pitch', nest: '60');
+                    museScoreXmlBuilder.element('tpc', nest: '14');
+                  });
+                });
+                print('Did write note ${noteCtr}');
+              }
+//            print('Wrote chord/quarter note1');
+//            museScoreXmlBuilder.element('Chord', nest: () {
+//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
+//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
+//              museScoreXmlBuilder.element('Note', nest: () {
+//                museScoreXmlBuilder.element('pitch', nest: '60');
+//                museScoreXmlBuilder.element('tpc', nest: '14');
+//              });
+//            });
+//            print('Wrote chord/quarter note2');
+//            museScoreXmlBuilder.element('Chord', nest: () {
+//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
+//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
+//              museScoreXmlBuilder.element('Note', nest: () {
+//                museScoreXmlBuilder.element('pitch', nest: '60');
+//                museScoreXmlBuilder.element('tpc', nest: '14');
+//              });
+//            });
+//            print('Wrote chord/quarter note3');
+//            museScoreXmlBuilder.element('Chord', nest: () {
+//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
+//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
+//              museScoreXmlBuilder.element('Note', nest: () {
+//                museScoreXmlBuilder.element('pitch', nest: '60');
+//                museScoreXmlBuilder.element('tpc', nest: '14');
+//              });
+//            });
+//            print('Wrote chord/quarter note4');
+            }); // end what? voice
+          }); // end what? measure
+        print('Will write subsequent bars if there are any');
+        for (var barCtr = 1; barCtr < nBars; barCtr++) {
+          // I think this first bar should not be in a loop
+
+          //
+          // start new measure here?
+          museScoreXmlBuilder.element('Measure', nest: () {
+            museScoreXmlBuilder.element('voice', nest: () {
+              for (var noteCtr = 0; noteCtr < sigNumerator; noteCtr++) {
+                museScoreXmlBuilder.element('Chord', nest: () {
+                  museScoreXmlBuilder.element('durationType', nest: 'quarter');
+                  museScoreXmlBuilder.element('StemDirection', nest: 'up');
+                  museScoreXmlBuilder.element('Note', nest: () {
+                    museScoreXmlBuilder.element('pitch', nest: '60');
+                    museScoreXmlBuilder.element('tpc', nest: '14');
+                  });
+                });
+//            museScoreXmlBuilder.element('Chord', nest: () {
+//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
+//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
+//              museScoreXmlBuilder.element('Note', nest: () {
+//                museScoreXmlBuilder.element('pitch', nest: '60');
+//                museScoreXmlBuilder.element('tpc', nest: '14');
+//              });
+//            });
+//            museScoreXmlBuilder.element('Chord', nest: () {
+//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
+//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
+//              museScoreXmlBuilder.element('Note', nest: () {
+//                museScoreXmlBuilder.element('pitch', nest: '60');
+//                museScoreXmlBuilder.element('tpc', nest: '14');
+//              });
+//            });
+//            museScoreXmlBuilder.element('Chord', nest: () {
+//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
+//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
+//              museScoreXmlBuilder.element('Note', nest: () {
+//                museScoreXmlBuilder.element('pitch', nest: '60');
+//                museScoreXmlBuilder.element('tpc', nest: '14');
+//              });
+//            });
+              print('Wrote note ${noteCtr}');
+              }
             });
           });
-        });
-
-//        museScoreXmlBuilder.element('Measure', nest: () {
-//          museScoreXmlBuilder.element('voice', nest: () {
-//            museScoreXmlBuilder.element('Chord', nest: () {
-//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
-//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
-//              museScoreXmlBuilder.element('Note', nest: () {
-//                museScoreXmlBuilder.element('pitch', nest: '60');
-//                museScoreXmlBuilder.element('tpc', nest: '14');
-//              });
-//            });
-//            museScoreXmlBuilder.element('Chord', nest: () {
-//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
-//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
-//              museScoreXmlBuilder.element('Note', nest: () {
-//                museScoreXmlBuilder.element('pitch', nest: '60');
-//                museScoreXmlBuilder.element('tpc', nest: '14');
-//              });
-//            });
-//            museScoreXmlBuilder.element('Chord', nest: () {
-//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
-//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
-//              museScoreXmlBuilder.element('Note', nest: () {
-//                museScoreXmlBuilder.element('pitch', nest: '60');
-//                museScoreXmlBuilder.element('tpc', nest: '14');
-//              });
-//            });
-//            museScoreXmlBuilder.element('Chord', nest: () {
-//              museScoreXmlBuilder.element('durationType', nest: 'quarter');
-//              museScoreXmlBuilder.element('StemDirection', nest: 'up');
-//              museScoreXmlBuilder.element('Note', nest: () {
-//                museScoreXmlBuilder.element('pitch', nest: '60');
-//                museScoreXmlBuilder.element('tpc', nest: '14');
-//              });
-//            });
-//          });
-//        });
+          print('Wrote bar ${barCtr}');
+        } // end bars loop?
       });
     });
   });
+//        museScoreXmlBuilder.element('Measure', nest: () {
+//          museScoreXmlBuilder.element('voice', nest: () {
+//            museScoreXmlBuilder.element('RepeatMeasure', nest: () {
+//              museScoreXmlBuilder.element('offset', nest: () {
+//                museScoreXmlBuilder.attribute('x', 0);
+//                museScoreXmlBuilder.attribute('y', -2);
+//              });
+//              museScoreXmlBuilder.element('durationType', nest: 'measure');
+//              museScoreXmlBuilder.element('duration', nest: '${sigNumerator}/${sigDenominator}');
+//            });
+//          });
+//        });
+
   return museScoreXmlBuilder;
 }
