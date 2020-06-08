@@ -1,5 +1,6 @@
 // ignore: library_prefixes
 import 'package:consoleapp1/museScore.dart' as museScore;
+import 'package:consoleapp1/diffMetSounds.dart' as diffMetSounds;
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,7 +11,8 @@ Future<void> main(List<String> arguments) async {
   Map<String, dynamic> metronomeJsonFileMap = json.decode(await File('data/met.json').readAsString());
 
   // Build a MuseScore .mscx file and write it out for use by MuseScore.
-  var museScoreXmlBuilder = museScore.buildMuseScore(metronomeJsonFileMap);
+  //var museScoreXmlBuilder = museScore.buildMuseScore(metronomeJsonFileMap);
+  var museScoreXmlBuilder = diffMetSounds.diffMetSounds(metronomeJsonFileMap);
   final museScoreXml = museScoreXmlBuilder.build();
   var formattedMuseScoreString = museScoreXml.toXmlString(pretty: true, indent: '  ');
   final museScoreFileName = metronomeJsonFileMap['museScoreFileName'];

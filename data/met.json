@@ -1,14 +1,14 @@
 {
   "museScoreFileName": "ForMuseScore.mscx",
-  "title": "Way Cool",
-  "subTitle": "Subtitle here",
+  "title": "Metronome Test",
+  "XXXsubTitle": "Subtitle here",
   "composer": "Luobo",
   "arranger": "Arranger Here",
   "XXXcopyrightDate": "today",
   "XXXcreationDate": "2020-06-09",
   "workingTitle": "Working Title Here",
   "tempo": 120,
-  "nBars": 2,
-  "sigNumerator": 5,
+  "nBars": 3,
+  "sigNumerator": 6,
   "sigDenominator": 4
 }
