@@ -1,8 +1,25 @@
 import 'package:xml/xml.dart';
 
-// Here's the manual for MuseScore: https://musescore.org/en/handbook
+XmlNode createXmlShell(Map<String, dynamic> metronomeInputMap) {
+  final museScoreXmlBuilder = XmlBuilder();
+  museScoreXmlBuilder.processing('xml', 'version="1.0" encoding="UTF-8"');
+  museScoreXmlBuilder.element('museScore', nest: () {
+    museScoreXmlBuilder.attribute('version', '3.01');
+    museScoreXmlBuilder.element('programVersion', nest: '3.2.3');
+    museScoreXmlBuilder.element('programRevision', nest: 'd2d863f');
+  });
+  return museScoreXmlBuilder.build();
+}
 
-XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
+XmlNode createScore(XmlNode shell) {
+//  shell.
+//  shell.element('Score', nest: () {
+//
+//  });
+  return shell;
+}
+
+XmlBuilder setupMuseScoreXmlBuilder(Map<String, dynamic> metronomeInputMap) {
   var now = DateTime.now();
   var museScoreFileName = metronomeInputMap['museScoreFileName'];
   var title = metronomeInputMap['title'] ?? museScoreFileName;
@@ -12,10 +29,11 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
   var copyrightDate = metronomeInputMap['copyrightDate'] ?? 'copyleft ${now.year}';
   var creationDate = metronomeInputMap['creationDate'] ?? '${now.month}/${now.day}/${now.year}';
   var workingTitle = metronomeInputMap['workingTitle'] ?? '';
+  // following are unused because we just want to have one note for each sound
   var sigNumerator = metronomeInputMap['sigNumerator'] ?? 4;
   var sigDenominator = metronomeInputMap['sigDenominator'] ?? 4;
-  var tempo = metronomeInputMap['tempo'] ?? '84';
-  var nBars = metronomeInputMap['nBars'] ?? '32';
+  var tempo = metronomeInputMap['tempo'] ?? 84;
+  var nBars = metronomeInputMap['nBars'] ?? 32;
 
   final museScoreXmlBuilder = XmlBuilder();
   museScoreXmlBuilder.processing('xml', 'version="1.0" encoding="UTF-8"');
@@ -31,8 +49,8 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
       museScoreXmlBuilder.element('currentLayer', nest: 0);
       museScoreXmlBuilder.element('Division', nest: 480);
       museScoreXmlBuilder.element('Style', nest: () {
-        museScoreXmlBuilder.element('pageHeight', nest: 11);
         museScoreXmlBuilder.element('pageWidth', nest: 8.5);
+        museScoreXmlBuilder.element('pageHeight', nest: 11);
         museScoreXmlBuilder.element('pagePrintableWidth', nest: 7.7126);
         museScoreXmlBuilder.element('pageEvenLeftMargin', nest: 0.393701);
         museScoreXmlBuilder.element('pageOddLeftMargin', nest: 0.393701);
@@ -74,13 +92,6 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
         museScoreXmlBuilder.element('oddHeaderR', nest: '\$P/\$n');
         museScoreXmlBuilder.element('footerOddEven', nest: 0);
         museScoreXmlBuilder.element('oddFooterC', nest: '\$F'); // \n works?
-//        museScoreXmlBuilder.element('oddFooterC', nest: () {
-//          museScoreXmlBuilder.text('''
-//          \n
-//              \$F
-//              '''
-//          );
-//        });
         museScoreXmlBuilder.element('voltaFontFace', nest: 'Georgia');
         museScoreXmlBuilder.element('voltaFramePadding', nest: 0);
         museScoreXmlBuilder.element('voltaFrameWidth', nest: 0);
@@ -224,7 +235,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
         museScoreXmlBuilder.element('user1FramePadding', nest: 0);
         museScoreXmlBuilder.element('user1FrameWidth', nest: 0);
         museScoreXmlBuilder.element('Spatium', nest: 1.76389);
-      }); // end Style
+      });
       museScoreXmlBuilder.element('showInvisible', nest: 1);
       museScoreXmlBuilder.element('showUnprintable', nest: 1);
       museScoreXmlBuilder.element('showFrames', nest: 1);
@@ -242,11 +253,11 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
         museScoreXmlBuilder.attribute('name', 'copyright');
         museScoreXmlBuilder.text(copyrightDate);
       });
+
       museScoreXmlBuilder.element('metaTag', nest: () {
         museScoreXmlBuilder.attribute('name', 'creationDate');
         museScoreXmlBuilder.text(creationDate);
       });
-
       museScoreXmlBuilder.element('metaTag', nest: () {
         museScoreXmlBuilder.attribute('name', 'lyricist');
         museScoreXmlBuilder.text('');
@@ -279,7 +290,6 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
         museScoreXmlBuilder.attribute('name', 'workNumber');
         museScoreXmlBuilder.text('');
       });
-
       museScoreXmlBuilder.element('metaTag', nest: () {
         museScoreXmlBuilder.attribute('name', 'workTitle');
         museScoreXmlBuilder.text(workingTitle);
@@ -306,7 +316,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
           museScoreXmlBuilder.element('useDrumset', nest: 1);
 
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '21');
+            museScoreXmlBuilder.attribute('pitch', 21);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteShapeTriangleLeftWhite');
@@ -314,19 +324,19 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
               museScoreXmlBuilder.element('quarter', nest: 'noteShapeTriangleLeftBlack');
               museScoreXmlBuilder.element('breve', nest: 'noteShapeTriangleLeftWhite');
             });
-            museScoreXmlBuilder.element('line', nest: '-1');
+            museScoreXmlBuilder.element('line', nest: -1);
             museScoreXmlBuilder.element('voice', nest: 0);
             museScoreXmlBuilder.element('name', nest: 'Metronome');
             museScoreXmlBuilder.element('stem', nest: 1);
             museScoreXmlBuilder.element('variants', nest: () {
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '34');
+                museScoreXmlBuilder.attribute('pitch', 34);
                 museScoreXmlBuilder.element('articulation', nest: 'sforzato');
               });
             });
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '23');
+            museScoreXmlBuilder.attribute('pitch', 23);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadPlusWhole');
@@ -334,13 +344,13 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
               museScoreXmlBuilder.element('quarter', nest: 'noteheadPlusBlack');
               museScoreXmlBuilder.element('breve', nest: 'noteheadPlusDoubleWhole');
             });
-            museScoreXmlBuilder.element('line', nest: '-1');
+            museScoreXmlBuilder.element('line', nest: -1);
             museScoreXmlBuilder.element('voice', nest: 0);
             museScoreXmlBuilder.element('name', nest: 'Hand Clap');
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '27');
+            museScoreXmlBuilder.attribute('pitch', 27);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadTriangleDownWhole');
@@ -354,7 +364,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '28');
+            museScoreXmlBuilder.attribute('pitch', 28);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadTriangleDownWhole');
@@ -368,92 +378,91 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '60');
+            museScoreXmlBuilder.attribute('pitch', 60);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('line', nest: 0);
             museScoreXmlBuilder.element('voice', nest: 0);
             museScoreXmlBuilder.element('name', nest: 'Hit');
             museScoreXmlBuilder.element('stem', nest: 1);
             museScoreXmlBuilder.element('shortcut', nest: 'A');
+
             museScoreXmlBuilder.element('variants', nest: () {
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '59');
+                museScoreXmlBuilder.attribute('pitch', 59);
                 museScoreXmlBuilder.element('tremolo', nest: 'r16');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '59');
+                museScoreXmlBuilder.attribute('pitch', 59);
                 museScoreXmlBuilder.element('articulation', nest: 'sforzato');
                 museScoreXmlBuilder.element('tremolo', nest: 'r16');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '59');
+                museScoreXmlBuilder.attribute('pitch', 59);
                 museScoreXmlBuilder.element('articulation', nest: 'tenuto');
                 museScoreXmlBuilder.element('tremolo', nest: 'r16');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '59');
+                museScoreXmlBuilder.attribute('pitch', 59);
                 museScoreXmlBuilder.element('articulation', nest: 'marcato');
                 museScoreXmlBuilder.element('tremolo', nest: 'r16');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '59');
+                museScoreXmlBuilder.attribute('pitch', 59);
                 museScoreXmlBuilder.element('articulation', nest: 'staccato');
                 museScoreXmlBuilder.element('tremolo', nest: 'r16');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '59');
+                museScoreXmlBuilder.attribute('pitch', 59);
                 museScoreXmlBuilder.element('articulation', nest: 'staccatissimo');
                 museScoreXmlBuilder.element('tremolo', nest: 'r16');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '59');
+                museScoreXmlBuilder.attribute('pitch', 59);
                 museScoreXmlBuilder.element('articulation', nest: 'portato');
                 museScoreXmlBuilder.element('tremolo', nest: 'r16');
               });
-
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '57');
-                museScoreXmlBuilder.element('tremolo', nest: 'buzzroll');
+                museScoreXmlBuilder.attribute('pitch', 57);
+                museScoreXmlBuilder.element('tremolo', nest: 'buzzroll ');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '57');
+                museScoreXmlBuilder.attribute('pitch', 57);
                 museScoreXmlBuilder.element('articulation', nest: 'sforzato');
                 museScoreXmlBuilder.element('tremolo', nest: 'buzzroll');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '57');
+                museScoreXmlBuilder.attribute('pitch', 57);
                 museScoreXmlBuilder.element('articulation', nest: 'tenuto');
                 museScoreXmlBuilder.element('tremolo', nest: 'buzzroll');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '57');
+                museScoreXmlBuilder.attribute('pitch', 57);
                 museScoreXmlBuilder.element('articulation', nest: 'marcato');
                 museScoreXmlBuilder.element('tremolo', nest: 'buzzroll');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '57');
+                museScoreXmlBuilder.attribute('pitch', 57);
                 museScoreXmlBuilder.element('articulation', nest: 'staccato');
                 museScoreXmlBuilder.element('tremolo', nest: 'buzzroll');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '57');
+                museScoreXmlBuilder.attribute('pitch', 57);
                 museScoreXmlBuilder.element('articulation', nest: 'staccatissimo');
                 museScoreXmlBuilder.element('tremolo', nest: 'buzzroll');
               });
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '57');
+                museScoreXmlBuilder.attribute('pitch', 57);
                 museScoreXmlBuilder.element('articulation', nest: 'portato');
                 museScoreXmlBuilder.element('tremolo', nest: 'buzzroll');
               });
-
               museScoreXmlBuilder.element('variant', nest: () {
-                museScoreXmlBuilder.attribute('pitch', '58');
+                museScoreXmlBuilder.attribute('pitch', 58);
                 museScoreXmlBuilder.element('articulation', nest: 'mordent-inverted');
               });
             });
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '61');
+            museScoreXmlBuilder.attribute('pitch', 61);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadXOrnate');
@@ -468,7 +477,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('shortcut', nest: 'B');
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '62');
+            museScoreXmlBuilder.attribute('pitch', 62);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadSlashedWhole1');
@@ -482,7 +491,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '63');
+            museScoreXmlBuilder.attribute('pitch', 63);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadXWhole');
@@ -490,14 +499,14 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
               museScoreXmlBuilder.element('quarter', nest: 'noteheadXBlack');
               museScoreXmlBuilder.element('breve', nest: 'noteheadXDoubleWhole');
             });
-            museScoreXmlBuilder.element('line', nest: '-1');
+            museScoreXmlBuilder.element('line', nest: -1);
             museScoreXmlBuilder.element('voice', nest: 0);
             museScoreXmlBuilder.element('name', nest: 'Rim');
             museScoreXmlBuilder.element('stem', nest: 1);
             museScoreXmlBuilder.element('shortcut', nest: 'E');
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '64');
+            museScoreXmlBuilder.attribute('pitch', 64);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadRoundWhiteWithDot');
@@ -512,7 +521,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('shortcut', nest: 'C');
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '65');
+            museScoreXmlBuilder.attribute('pitch', 65);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadSlashedWhole2');
@@ -527,7 +536,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('shortcut', nest: 'D');
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '67');
+            museScoreXmlBuilder.attribute('pitch', 67);
 
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
@@ -543,7 +552,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('shortcut', nest: 'F');
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '68');
+            museScoreXmlBuilder.attribute('pitch', 68);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadPlusWhole');
@@ -551,13 +560,13 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
               museScoreXmlBuilder.element('quarter', nest: 'noteheadPlusBlack');
               museScoreXmlBuilder.element('breve', nest: 'noteheadPlusDoubleWhole');
             });
-            museScoreXmlBuilder.element('line', nest: '                    -1');
+            museScoreXmlBuilder.element('line', nest: -1);
             museScoreXmlBuilder.element('voice', nest: 0);
             museScoreXmlBuilder.element('name', nest: 'Hand Hit');
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '72');
+            museScoreXmlBuilder.attribute('pitch', 72);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadDiamondWhole');
@@ -571,7 +580,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '73');
+            museScoreXmlBuilder.attribute('pitch', 73);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadTriangleUpWhole');
@@ -585,7 +594,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '74');
+            museScoreXmlBuilder.attribute('pitch', 74);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadMoonWhite');
@@ -599,7 +608,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '75');
+            museScoreXmlBuilder.attribute('pitch', 75);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadCircleSlash');
@@ -613,7 +622,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('stem', nest: 1);
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '76');
+            museScoreXmlBuilder.attribute('pitch', 76);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteheadXWhole');
@@ -628,7 +637,7 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('shortcut', nest: 'G');
           });
           museScoreXmlBuilder.element('Drum', nest: () {
-            museScoreXmlBuilder.attribute('pitch', '77');
+            museScoreXmlBuilder.attribute('pitch', 77);
             museScoreXmlBuilder.element('head', nest: 'normal');
             museScoreXmlBuilder.element('noteheads', nest: () {
               museScoreXmlBuilder.element('whole', nest: 'noteShapeTriangleLeftWhite');
@@ -646,158 +655,71 @@ XmlBuilder buildMuseScore(Map<String, dynamic> metronomeInputMap) {
             museScoreXmlBuilder.element('velocity', nest: 100);
             museScoreXmlBuilder.element('gateTime', nest: 100);
           });
-
           museScoreXmlBuilder.element('Articulation', nest: () {
             museScoreXmlBuilder.attribute('name', 'staccatissimo');
 
             museScoreXmlBuilder.element('velocity', nest: 100);
-            museScoreXmlBuilder.element('gateTime', nest: '33');
+            museScoreXmlBuilder.element('gateTime', nest: 33);
           });
           museScoreXmlBuilder.element('Articulation', nest: () {
             museScoreXmlBuilder.attribute('name', 'staccato');
 
             museScoreXmlBuilder.element('velocity', nest: 100);
-            museScoreXmlBuilder.element('gateTime', nest: '50');
+            museScoreXmlBuilder.element('gateTime', nest: 50);
           });
           museScoreXmlBuilder.element('Articulation', nest: () {
             museScoreXmlBuilder.attribute('name', 'portato');
-            museScoreXmlBuilder.element('velocity', nest: '100');
-            museScoreXmlBuilder.element('gateTime', nest: '33');
+
+            museScoreXmlBuilder.element('velocity', nest: 100);
+            museScoreXmlBuilder.element('gateTime', nest: 100);
           });
           museScoreXmlBuilder.element('Articulation', nest: () {
             museScoreXmlBuilder.attribute('name', 'tenuto');
-            museScoreXmlBuilder.element('velocity', nest: '115');
-            museScoreXmlBuilder.element('gateTime', nest: '100');
+
+            museScoreXmlBuilder.element('velocity', nest: 115);
+            museScoreXmlBuilder.element('gateTime', nest: 100);
           });
           museScoreXmlBuilder.element('Articulation', nest: () {
             museScoreXmlBuilder.attribute('name', 'marcato');
-            museScoreXmlBuilder.element('velocity', nest: '127');
-            museScoreXmlBuilder.element('gateTime', nest: '80');
+
+            museScoreXmlBuilder.element('velocity', nest: 127);
+            museScoreXmlBuilder.element('gateTime', nest: 80);
           });
           museScoreXmlBuilder.element('Articulation', nest: () {
             museScoreXmlBuilder.attribute('name', 'sforzato');
-            museScoreXmlBuilder.element('velocity', nest: '127');
-            museScoreXmlBuilder.element('gateTime', nest: '100');
+
+            museScoreXmlBuilder.element('velocity', nest: 127);
+            museScoreXmlBuilder.element('gateTime', nest: 100);
           });
           museScoreXmlBuilder.element('Articulation', nest: () {
             museScoreXmlBuilder.attribute('name', 'plusstop');
-            museScoreXmlBuilder.element('velocity', nest: '80');
-            museScoreXmlBuilder.element('gateTime', nest: '80');
+
+            museScoreXmlBuilder.element('velocity', nest: 80);
+            museScoreXmlBuilder.element('gateTime', nest: 80);
           });
           museScoreXmlBuilder.element('Channel', nest: () {
             museScoreXmlBuilder.element('controller', nest: () {
-              museScoreXmlBuilder.attribute('ctrl', '0');
-              museScoreXmlBuilder.attribute('value', '0');
+              museScoreXmlBuilder.attribute('ctrl', 0);
+              museScoreXmlBuilder.attribute('value', 0);
             });
             museScoreXmlBuilder.element('controller', nest: () {
-              museScoreXmlBuilder.attribute('ctrl', '32');
-              museScoreXmlBuilder.attribute('value', '0');
+              museScoreXmlBuilder.attribute('ctrl', 32);
+              museScoreXmlBuilder.attribute('value', 0);
             });
             museScoreXmlBuilder.element('program', nest: () {
               museScoreXmlBuilder.attribute('value', 6);
             });
             museScoreXmlBuilder.element('controller', nest: () {
-              museScoreXmlBuilder.attribute('ctrl', '7');
-              museScoreXmlBuilder.attribute('value', '106');
+              museScoreXmlBuilder.attribute('ctrl', 7);
+              museScoreXmlBuilder.attribute('value', 106);
             });
-            museScoreXmlBuilder.element('synti', nest: 'Zerberus'); // ??
+            museScoreXmlBuilder.element('synti', nest: 'Zerberus');
           });
         });
-      }); // end Part
-      museScoreXmlBuilder.element('Staff', nest: () {
-        museScoreXmlBuilder.attribute('id', 1);
+      });
 
-        museScoreXmlBuilder.element('VBox', nest: () {
-          museScoreXmlBuilder.element('height', nest: '10');
-          museScoreXmlBuilder.element('Text', nest: () {
-            museScoreXmlBuilder.element('style', nest: 'Title');
-            museScoreXmlBuilder.element('text', nest: title);
-          });
-          museScoreXmlBuilder.element('Text', nest: () {
-            museScoreXmlBuilder.element('style', nest: 'Subtitle');
-            museScoreXmlBuilder.element('text', nest: subTitle);
-          });
-          museScoreXmlBuilder.element('Text', nest: () {
-            museScoreXmlBuilder.element('style', nest: 'Composer');
-            museScoreXmlBuilder.element('text', nest: composer);
-          });
-        });
 
-        //print('Starting to write ${nBars} bars.');
-        //print('Starting to write first bar');
-        museScoreXmlBuilder.element('Measure', nest: () {
-          museScoreXmlBuilder.element('voice', nest: () {
-            // we only want to do this when there's a time sig change
-            museScoreXmlBuilder.element('TimeSig', nest: () {
-              museScoreXmlBuilder.element('sigN', nest: sigNumerator);
-              museScoreXmlBuilder.element('sigD', nest: sigDenominator);
-            });
-            // Why is this tempo indicator here, and not before the measure???
-            // Doesn't work before this point
-            museScoreXmlBuilder.element('Tempo', nest: () {
-              // tempo value T in next line is a multiplier M, where M=1 means T=60
-              // So, if you want a tempo of T, then divide it by 60 to get the value for 'tempo'
-              museScoreXmlBuilder.element('tempo', nest: '${tempo / 60}');
-              museScoreXmlBuilder.element('followText', nest: '1');
-              museScoreXmlBuilder.element('text', nest: () {
-                museScoreXmlBuilder.element('sym', nest: 'metNoteQuarterUp');
-                museScoreXmlBuilder.text(' = ${tempo}'); // prob here???
-              });
-            });
-            //print('Wrote tempo which is strange here');
-            // Here come the notes that make up the metronome
-            // This section should therefore be some kind of looping within looping to account for
-            // various metronome settings for a tune, with set of rolloff segments, or a set of tunes.
-            //
-            for (var noteCtr = 0; noteCtr < sigNumerator; noteCtr++) {
-              museScoreXmlBuilder.element('Chord', nest: () {
-                museScoreXmlBuilder.element('durationType', nest: 'quarter');
-                museScoreXmlBuilder.element('StemDirection', nest: 'up');
-                museScoreXmlBuilder.element('Note', nest: () {
-                  museScoreXmlBuilder.element('pitch', nest: '60');
-                  museScoreXmlBuilder.element('tpc', nest: '14');
-                }); // end Note
-              }); // end Chord
-              //print('Did write note ${noteCtr}');
-            }
-          }); // end voice
-        }); // end Measure
-        //
-        // Write subsequent bars if there are any
-        //
-        for (var barCtr = 1; barCtr < nBars; barCtr++) {
-          museScoreXmlBuilder.element('Measure', nest: () {
-            museScoreXmlBuilder.element('voice', nest: () {
-              for (var noteCtr = 0; noteCtr < sigNumerator; noteCtr++) {
-                museScoreXmlBuilder.element('Chord', nest: () {
-                  museScoreXmlBuilder.element('durationType', nest: 'quarter');
-                  museScoreXmlBuilder.element('StemDirection', nest: 'up');
-                  museScoreXmlBuilder.element('Note', nest: () {
-                    museScoreXmlBuilder.element('pitch', nest: 60);
-                    museScoreXmlBuilder.element('tpc', nest: 14);
-                  }); // end Note
-                }); // end Chord
-              } // end loop for notes
-            }); // end voice
-          }); // end Measure
-        } // end loop for measures
-      }); // end Staff
-    }); // end Score
-  }); // end museScore
-
-  // This is a "repeat" previous bar indicator.  Wish I could put a number over it
-  //        museScoreXmlBuilder.element('Measure', nest: () {
-//          museScoreXmlBuilder.element('voice', nest: () {
-//            museScoreXmlBuilder.element('RepeatMeasure', nest: () {
-//              museScoreXmlBuilder.element('offset', nest: () {
-//                museScoreXmlBuilder.attribute('x', 0);
-//                museScoreXmlBuilder.attribute('y', -2);
-//              });
-//              museScoreXmlBuilder.element('durationType', nest: 'measure');
-//              museScoreXmlBuilder.element('duration', nest: '${sigNumerator}/${sigDenominator}');
-//            });
-//          });
-//        });
-
+    });
+  });
   return museScoreXmlBuilder;
 }
