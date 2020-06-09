@@ -1,4 +1,10 @@
 import 'package:xml/xml.dart';
+// This file is the start of a more modular/functional approach
+// to put a piece together.  It's mostly a tree traversal, going
+// depth first.  Visit node, go first child, repeat, then sibling.
+// Tuplets are a bit different though.  Just markers as you
+// traverse.
+
 //
 // For now, assume the MuseScore XML file is this:
 // museScore
@@ -801,6 +807,10 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
   // This is perhaps where I start to read the drum music language data file, in JSON.
   // This is what contains my drum language.
   // But for now I'm just putting in the rolloff stuff.
+  // The following is 6 4/4 bars.  First bar just quarter notes.
+  // Next 5 bars are 16th note swing (12th 24th, 12th 24th, ...)
+  //
+  // First bar:
   xmlBuilder.element('Measure', nest: () {
     xmlBuilder.element('voice', nest: () {
       xmlBuilder.element('TimeSig', nest: () {
@@ -808,11 +818,11 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
         xmlBuilder.element('sigD', nest: '4');
       });
       xmlBuilder.element('Tempo', nest: () {
-        xmlBuilder.element('tempo', nest: '1.4');
+        xmlBuilder.element('tempo', nest: metronomeInputMap['tempo'] / 60.0);
         xmlBuilder.element('followText', nest: '1');
         xmlBuilder.element('text', nest: () {
           xmlBuilder.element('sym', nest: 'metNoteQuarterUp');
-          xmlBuilder.text(' = 84'); // check this stuff
+          xmlBuilder.text(' = ${metronomeInputMap['tempo']}');
         });
       });
       xmlBuilder.element('Chord', nest: () {
@@ -853,12 +863,14 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
       });
     });
   });
+
+  // Second bar:
   xmlBuilder.element('Measure', nest: () {
     xmlBuilder.element('LayoutBreak', nest: () {
       xmlBuilder.element('subtype', nest: 'line');
     });
-    xmlBuilder.element('voice', nest: ()
-    {
+    xmlBuilder.element('voice', nest: () {
+      // Indicate start of a tuplet, but don't nest the notes in this object
       xmlBuilder.element('Tuplet', nest: () {
         xmlBuilder.element('normalNotes', nest: '4');
         xmlBuilder.element('actualNotes', nest: '6');
@@ -868,6 +880,7 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
           xmlBuilder.element('text', nest: '6');
         });
       });
+      // 12th note
       xmlBuilder.element('Chord', nest: () {
         xmlBuilder.element('durationType', nest: 'eighth');
         xmlBuilder.element('Articulation', nest: () {
@@ -881,6 +894,7 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
           xmlBuilder.element('head', nest: 'custom');
         });
       });
+      // 24th note
       xmlBuilder.element('Chord', nest: () {
         xmlBuilder.element('durationType', nest: '16th');
         xmlBuilder.element('StemDirection', nest: 'up');
@@ -890,6 +904,7 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
           xmlBuilder.element('head', nest: 'custom');
         });
       });
+      // 12th note
       xmlBuilder.element('Chord', nest: () {
         xmlBuilder.element('durationType', nest: 'eighth');
         xmlBuilder.element('Articulation', nest: () {
@@ -903,6 +918,7 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
           xmlBuilder.element('head', nest: 'custom');
         });
       });
+      // 24th note
       xmlBuilder.element('Chord', nest: () {
         xmlBuilder.element('durationType', nest: '16th');
         xmlBuilder.element('StemDirection', nest: 'up');
@@ -911,71 +927,14 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
           xmlBuilder.element('tpc', nest: '16');
           xmlBuilder.element('head', nest: 'custom');
         });
-      }); // end chord
-//    }); // end voice ?????????
+      });
 
-      // Here's where they have a <endTuplet/> which doesn't make sense to me
-      // Maybe special meaning.
-
+      // Don't know why they did it this way, but this marks the end
+      // of the tuplet.  They don't nest everything in a tuplet.
+      // Is it so it can go ver a bar line, or off beat?
       xmlBuilder.element('endTuplet');
 
-
-      xmlBuilder.element('Tuplet', nest: () {
-        xmlBuilder.element('normalNotes', nest: '4');
-        xmlBuilder.element('actualNotes', nest: '6');
-        xmlBuilder.element('baseNote', nest: '16th');
-        xmlBuilder.element('Number', nest: () {
-          xmlBuilder.element('style', nest: 'Tuplet');
-          xmlBuilder.element('text', nest: '6');
-        });
-      }); // end Tuplet
-      xmlBuilder.element('Chord', nest: () {
-        xmlBuilder.element('durationType', nest: 'eighth');
-        xmlBuilder.element('Articulation', nest: () {
-          xmlBuilder.element('direction', nest: 'up');
-          xmlBuilder.element('subtype', nest: 'articAccentAbove');
-        });
-        xmlBuilder.element('StemDirection', nest: 'up');
-        xmlBuilder.element('Note', nest: () {
-          xmlBuilder.element('pitch', nest: '62');
-          xmlBuilder.element('tpc', nest: '16');
-          xmlBuilder.element('head', nest: 'custom');
-        });
-      });
-      xmlBuilder.element('Chord', nest: () {
-        xmlBuilder.element('durationType', nest: '16th');
-        xmlBuilder.element('StemDirection', nest: 'up');
-        xmlBuilder.element('Note', nest: () {
-          xmlBuilder.element('pitch', nest: '62');
-          xmlBuilder.element('tpc', nest: '16');
-          xmlBuilder.element('head', nest: 'custom');
-        });
-      });
-      xmlBuilder.element('Chord', nest: () {
-        xmlBuilder.element('durationType', nest: 'eighth');
-        xmlBuilder.element('Articulation', nest: () {
-          xmlBuilder.element('direction', nest: 'up');
-          xmlBuilder.element('subtype', nest: 'articAccentAbove');
-        });
-        xmlBuilder.element('StemDirection', nest: 'up');
-        xmlBuilder.element('Note', nest: () {
-          xmlBuilder.element('pitch', nest: '62');
-          xmlBuilder.element('tpc', nest: '16');
-          xmlBuilder.element('head', nest: 'custom');
-        });
-      });
-      xmlBuilder.element('Chord', nest: () {
-        xmlBuilder.element('durationType', nest: '16th');
-        xmlBuilder.element('StemDirection', nest: 'up');
-        xmlBuilder.element('Note', nest: () {
-          xmlBuilder.element('pitch', nest: '62');
-          xmlBuilder.element('tpc', nest: '16');
-          xmlBuilder.element('head', nest: 'custom');
-        });
-      });
-
-      xmlBuilder.element('endTuplet'); // not sure why this is here or if nec?
-
+      // Start a new tuplet
       xmlBuilder.element('Tuplet', nest: () {
         xmlBuilder.element('normalNotes', nest: '4');
         xmlBuilder.element('actualNotes', nest: '6');
@@ -986,6 +945,61 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
         });
       });
       xmlBuilder.element('Chord', nest: () {
+        xmlBuilder.element('durationType', nest: 'eighth'); // 8th note but in tuple
+        xmlBuilder.element('Articulation', nest: () {
+          xmlBuilder.element('direction', nest: 'up');
+          xmlBuilder.element('subtype', nest: 'articAccentAbove');
+        });
+        xmlBuilder.element('StemDirection', nest: 'up');
+        xmlBuilder.element('Note', nest: () {
+          xmlBuilder.element('pitch', nest: '62');
+          xmlBuilder.element('tpc', nest: '16');
+          xmlBuilder.element('head', nest: 'custom');
+        });
+      });
+      xmlBuilder.element('Chord', nest: () {
+        xmlBuilder.element('durationType', nest: '16th'); // 16th == 24th
+        xmlBuilder.element('StemDirection', nest: 'up');
+        xmlBuilder.element('Note', nest: () {
+          xmlBuilder.element('pitch', nest: '62');
+          xmlBuilder.element('tpc', nest: '16');
+          xmlBuilder.element('head', nest: 'custom');
+        });
+      });
+      xmlBuilder.element('Chord', nest: () {
+        xmlBuilder.element('durationType', nest: 'eighth');
+        xmlBuilder.element('Articulation', nest: () {
+          xmlBuilder.element('direction', nest: 'up');
+          xmlBuilder.element('subtype', nest: 'articAccentAbove');
+        });
+        xmlBuilder.element('StemDirection', nest: 'up');
+        xmlBuilder.element('Note', nest: () {
+          xmlBuilder.element('pitch', nest: '62');
+          xmlBuilder.element('tpc', nest: '16');
+          xmlBuilder.element('head', nest: 'custom');
+        });
+      });
+      xmlBuilder.element('Chord', nest: () {
+        xmlBuilder.element('durationType', nest: '16th');
+        xmlBuilder.element('StemDirection', nest: 'up');
+        xmlBuilder.element('Note', nest: () {
+          xmlBuilder.element('pitch', nest: '62');
+          xmlBuilder.element('tpc', nest: '16');
+          xmlBuilder.element('head', nest: 'custom');
+        });
+      });
+      xmlBuilder.element('endTuplet'); // marker to end previoustuple
+
+      xmlBuilder.element('Tuplet', nest: () {
+        xmlBuilder.element('normalNotes', nest: '4');
+        xmlBuilder.element('actualNotes', nest: '6');
+        xmlBuilder.element('baseNote', nest: '16th');
+        xmlBuilder.element('Number', nest: () {
+          xmlBuilder.element('style', nest: 'Tuplet');
+          xmlBuilder.element('text', nest: '6');
+        });
+      });
+      xmlBuilder.element('Chord', nest: () {
         xmlBuilder.element('durationType', nest: 'eighth');
         xmlBuilder.element('Articulation', nest: () {
           xmlBuilder.element('direction', nest: 'up');
@@ -1030,7 +1044,7 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
           xmlBuilder.element('head', nest: 'custom');
         });
       });
-      xmlBuilder.element('endTuplet'); // not sure why this is here or if nec?
+      xmlBuilder.element('endTuplet'); // marks end of tuple
 
       xmlBuilder.element('Tuplet', nest: () {
         xmlBuilder.element('normalNotes', nest: '4');
@@ -1088,6 +1102,8 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
       xmlBuilder.element('endTuplet'); // not sure why this is here or if nec?
     }); // end voice?????
   }); // end measure
+
+  // The remaining bars are repeats
   xmlBuilder.element('Measure', nest: () {
     xmlBuilder.element('voice', nest: () {
       xmlBuilder.element('RepeatMeasure', nest: () {
@@ -1124,7 +1140,7 @@ XmlBuilder buildMeasures(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeIn
       }); // end RepeatMeasure
     }); // end voice
   }); // end Measure
-  // ??????????????????????
+
   xmlBuilder.element('Measure', nest: () {
     xmlBuilder.element('voice', nest: () {
       xmlBuilder.element('RepeatMeasure', nest: () {
@@ -1327,6 +1343,5 @@ XmlBuilder buildDrum(XmlBuilder xmlBuilder, Map<String, dynamic> metronomeInputM
     });
 
   });
-
   return xmlBuilder;
 }

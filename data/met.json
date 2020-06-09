@@ -1,13 +1,13 @@
 {
   "museScoreFileName": "ForMuseScore.mscx",
-  "title": "Metronome Test",
+  "title": "Roll Off Metronome",
   "XXXsubTitle": "Subtitle here",
   "composer": "Luobo",
   "arranger": "Arranger Here",
   "XXXcopyrightDate": "today",
   "XXXcreationDate": "2020-06-09",
   "workingTitle": "Working Title Here",
-  "tempo": 120,
+  "tempo": 84,
   "nBars": 3,
   "sigNumerator": 6,
   "sigDenominator": 4
